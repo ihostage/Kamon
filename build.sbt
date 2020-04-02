@@ -1,5 +1,5 @@
 /* =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2020 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -125,7 +125,8 @@ lazy val instrumentation = (project in file("instrumentation"))
     `kamon-system-metrics`,
     `kamon-akka`,
     `kamon-akka-http`,
-    `kamon-play`
+    `kamon-play`,
+    `kamon-lagom`
   )
 
 
@@ -368,6 +369,18 @@ lazy val `kamon-play` = (project in file("instrumentation/kamon-play"))
     `kamon-testkit` % "test-common,test-play-2.7,test-play-2.6"
   )
 
+lazy val `kamon-lagom` = (project in file("instrumentation/kamon-lagom"))
+  .disablePlugins(AssemblyPlugin)
+  .settings(
+    crossScalaVersions := Seq("2.11.12", "2.12.11", "2.13.1"),
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, scalaMajor)) if scalaMajor == 11 => providedScope("com.lightbend.lagom" %% "lagom-server" % "1.4.13")
+        case _ => providedScope("com.lightbend.lagom" %% "lagom-server" % "1.6.1")
+      }
+    }
+  )
+  .dependsOn(`kamon-core` % "compile")
 
 /**
   * Reporters
@@ -580,5 +593,6 @@ val `kamon-bundle` = (project in file("bundle/kamon-bundle"))
     `kamon-system-metrics` % "shaded",
     `kamon-akka` % "shaded",
     `kamon-akka-http` % "shaded",
-    `kamon-play` % "shaded"
+    `kamon-play` % "shaded",
+    `kamon-lagom` % "shaded"
   )
